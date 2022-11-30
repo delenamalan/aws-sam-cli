@@ -22,3 +22,4 @@ pytest-json-report==1.5.0
 # formatter
 black==22.6.0
 psutil==5.9.0
+pytest-split==0.8.0
