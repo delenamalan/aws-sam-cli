@@ -136,7 +136,7 @@ test_script:
   - "git --version"
   - "venv\\Scripts\\activate"
   - "docker system prune -a -f"
-  - ps: "pytest -vv --store-durations --splits $TOTAL_SPLITS --group $CONFIGURATION --json-report --json-report-file=TEST_REPORT.json tests"
+  - ps: "pytest -vv --store-durations --splits $env:TOTAL_SPLITS --group $env:CONFIGURATION --json-report --json-report-file=TEST_REPORT.json tests"
 
 # Uncomment for RDP
 # on_finish:
