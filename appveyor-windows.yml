@@ -5,19 +5,16 @@ build: off
 clone_folder: C:\source
 
 configuration:
-  - BuildIntegTesting
-  - LocalZipTerraformBuildIntegTesting
-  - LocalZipTerraformBuildInContainerIntegTesting
-  - S3ZipTerraformBuildIntegTesting
-  - S3ZipTerraformBuildInContainerIntegTesting
-  - OtherTerraformBuildIntegTesting
-  - DeployIntegTesting
-  - PackageIntegTesting
-  - DeleteIntegTesting
-  - SyncIntegTesting
-  - LocalIntegTesting
-  # other Integration testing, Dev, regression and smoke testing
-  - OtherTesting
+  - 1
+  - 2
+  - 3
+  - 4
+  - 5
+  - 6
+  - 7
+  - 8
+  - 9
+  - 10
 
 environment:
   AWS_DEFAULT_REGION: us-east-1
@@ -39,6 +36,7 @@ environment:
   AWS_S3: "AWS_S3_TESTING"
   AWS_ECR: "AWS_ECR_TESTING"
   APPVEYOR_CONSOLE_DISABLE_PTY: true
+  TOTAL_SPLITS: 10
 
 init:
   # Uncomment this for RDP
@@ -54,6 +52,8 @@ cache:
   - C:\ProgramData\chocolatey\lib -> appveyor.yml
 
 install:
+  # set job name
+  - sh: "export APPVEYOR_JOB_NAME=python:$PYTHON_HOME-JobIndex:$CONFIGURATION"
   # setup make
   - "choco install make"
 
@@ -131,155 +131,13 @@ on_finish:
     aws stepfunctions send-task-success --task-token \"$env:TASK_TOKEN\" --task-output \"{}\" --region us-west-2;
   }"
 
+test_script:
+  # Reactivate virtualenv before running tests
+  - "git --version"
+  - "venv\\Scripts\\activate"
+  - "docker system prune -a -f"
+  - ps: "pytest -vv --store-durations --splits $TOTAL_SPLITS --group $CONFIGURATION --json-report --json-report-file=TEST_REPORT.json tests"
 
-for:
-  #Integ testing build, regression
-  - matrix:
-      only:
-        - configuration: BuildIntegTesting
-
-    test_script:
-      # Reactivate virtualenv before running tests
-      - "git --version"
-      - "venv\\Scripts\\activate"
-      - "docker system prune -a -f"
-      - ps: "pytest -vv --store-durations tests/integration/buildcmd --ignore tests/integration/buildcmd/test_build_terraform_applications.py --ignore=tests/integration/buildcmd/test_build_terraform_applications_other_cases.py --json-report --json-report-file=TEST_REPORT-integration-buildcmd.json"
-
-  # Local ZIP  Terraform Build integ testing
-  - matrix:
-      only:
-        - configuration: LocalZipTerraformBuildIntegTesting
-
-    test_script:
-      # Reactivate virtualenv before running tests
-      - "git --version"
-      - "venv\\Scripts\\activate"
-      - "docker system prune -a -f"
-      - ps: "pytest -vv --store-durations -n 4 tests/integration/buildcmd/test_build_terraform_applications.py::TestBuildTerraformApplicationsWithZipBasedLambdaFunctionAndLocalBackend_0 --json-report --json-report-file=TEST_REPORT-integration-buildcmd.json"
-
-  # Local ZIP  Terraform Build In Container  integ testing
-  - matrix:
-      only:
-        - configuration: LocalZipTerraformBuildInContainerIntegTesting
-
-    test_script:
-      # Reactivate virtualenv before running tests
-      - "git --version"
-      - "venv\\Scripts\\activate"
-      - "docker system prune -a -f"
-      - ps: "pytest -vv --store-durations tests/integration/buildcmd/test_build_terraform_applications.py::TestBuildTerraformApplicationsWithZipBasedLambdaFunctionAndLocalBackend_1 --json-report --json-report-file=TEST_REPORT-integration-buildcmd.json"
-
-  # S3 ZIP  Terraform Build integ testing
-  - matrix:
-      only:
-        - configuration: S3ZipTerraformBuildIntegTesting
-
-    test_script:
-      # Reactivate virtualenv before running tests
-      - "git --version"
-      - "venv\\Scripts\\activate"
-      - "docker system prune -a -f"
-      - ps: "pytest -vv --store-durations -n 4 tests/integration/buildcmd/test_build_terraform_applications.py::TestBuildTerraformApplicationsWithZipBasedLambdaFunctionAndS3Backend_0 --json-report --json-report-file=TEST_REPORT-integration-buildcmd.json"
-
-  # S3 ZIP  Terraform Build In Container integ testing
-  - matrix:
-      only:
-        - configuration: S3ZipTerraformBuildInContainerIntegTesting
-
-    test_script:
-      # Reactivate virtualenv before running tests
-      - "git --version"
-      - "venv\\Scripts\\activate"
-      - "docker system prune -a -f"
-      - ps: "pytest -vv --store-durations tests/integration/buildcmd/test_build_terraform_applications.py::TestBuildTerraformApplicationsWithZipBasedLambdaFunctionAndS3Backend_1 --json-report --json-report-file=TEST_REPORT-integration-buildcmd.json"
-
-  # Other Terraform Build integ testing
-  - matrix:
-      only:
-        - configuration: OtherTerraformBuildIntegTesting
-
-    test_script:
-      # Reactivate virtualenv before running tests
-      - "git --version"
-      - "venv\\Scripts\\activate"
-      - "docker system prune -a -f"
-      - ps: "pytest -vv --store-durations -n 4 tests/integration/buildcmd/test_build_terraform_applications_other_cases.py --json-report --json-report-file=TEST_REPORT-integration-buildcmd.json"
-
-  #Integ testing deploy
-  - matrix:
-      only:
-        - configuration: DeployIntegTesting
-
-    test_script:
-      # Reactivate virtualenv before running tests
-      - "git --version"
-      - "venv\\Scripts\\activate"
-      - "docker system prune -a -f"
-      - ps: "pytest -vv --store-durations tests/integration/deploy --json-report --json-report-file=TEST_REPORT-integration-deploy.json"
-
-  # Integ testing package
-  - matrix:
-      only:
-        - configuration: PackageIntegTesting
-
-    test_script:
-      # Reactivate virtualenv before running tests
-      - "git --version"
-      - "venv\\Scripts\\activate"
-      - "docker system prune -a -f"
-      - ps: "pytest -vv --store-durations tests/integration/package --json-report --json-report-file=TEST_REPORT-integration-package.json"
-
-  # Integ testing delete
-  - matrix:
-      only:
-        - configuration: DeleteIntegTesting
-
-    test_script:
-      # Reactivate virtualenv before running tests
-      - "git --version"
-      - "venv\\Scripts\\activate"
-      - "docker system prune -a -f"
-      - ps: "pytest -vv --store-durations tests/integration/delete --json-report --json-report-file=TEST_REPORT-integration-delete.json"
-
-  # Integ testing sync
-  - matrix:
-      only:
-        - configuration: SyncIntegTesting
-
-    test_script:
-      # Reactivate virtualenv before running tests
-      - "git --version"
-      - "venv\\Scripts\\activate"
-      - "docker system prune -a -f"
-      - ps: "pytest -vv --store-durations tests/integration/sync --json-report --json-report-file=TEST_REPORT-integration-sync.json"
-
-  #Integ testing local
-  - matrix:
-      only:
-        - configuration: LocalIntegTesting
-
-    test_script:
-      # Reactivate virtualenv before running tests
-      - "git --version"
-      - "venv\\Scripts\\activate"
-      - "docker system prune -a -f"
-      - ps: "pytest -vv --store-durations tests/integration/local --json-report --json-report-file=TEST_REPORT-integration-local.json"
-
-  #Other testing
-  - matrix:
-      only:
-        - configuration: OtherTesting
-
-    test_script:
-      # Reactivate virtualenv before running tests
-      - "git --version"
-      - "venv\\Scripts\\activate"
-      - "docker system prune -a -f"
-      - ps: "pytest --cov samcli --cov-report term-missing --cov-fail-under 94 tests/unit --json-report --json-report-file=TEST_REPORT-unit.json"
-      - "mypy setup.py samcli tests"
-      - ps: "pytest -n 4 tests/functional --json-report --json-report-file=TEST_REPORT-functional.json"
-      - ps: "pytest -vv tests/integration --ignore=tests/integration/buildcmd --ignore=tests/integration/delete --ignore=tests/integration/deploy --ignore=tests/integration/package --ignore=tests/integration/sync --ignore=tests/integration/local --json-report --json-report-file=TEST_REPORT-integration-others.json"
-      - ps: "pytest -vv tests/regression --json-report --json-report-file=TEST_REPORT-regression.json"
 # Uncomment for RDP
 # on_finish:
 #   - ps: $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
