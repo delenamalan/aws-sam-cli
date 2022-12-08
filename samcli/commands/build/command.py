@@ -33,7 +33,7 @@ LOG = logging.getLogger(__name__)
 
 
 HELP_TEXT = """
-Use this command to build your AWS Lambda Functions source code to generate artifacts that target AWS Lambda's
+Use this command to build your AWS Lambda function's source code to generate artifacts that target AWS Lambda's
 execution environment.\n
 \b
 Supported Resource Types
@@ -55,17 +55,17 @@ Examples
 To use this command, update your SAM template to specify the path
 to your function's source code in the resource's Code or CodeUri property.
 \b
-To build on your workstation, run this command in folder containing
-SAM template. Built artifacts will be written to .aws-sam/build folder
+To build on your workstation, run this command in a folder containing
+your SAM template. Build artifacts will be written to the .aws-sam/build folder.
 $ sam build\n
 \b
-To build inside a AWS Lambda like Docker container
+To build inside an AWS Lambda-like Docker container
 $ sam build --use-container
 \b
-To build with inline environment variables passed inside build containers
+To build with inline environment variables passed to a build container
 $ sam build --use-container --container-env-var Function.ENV_VAR=value --container-env-var GLOBAL_ENV_VAR=value
 \b
-To build with environment variables file passd inside build containers
+To build with an environment variables file passed to a build container
 $ sam build --use-container --container-env-var-file env.json
 \b
 To build & run your functions locally
@@ -74,8 +74,8 @@ $ sam build && sam local invoke
 To build and package for deployment
 $ sam build && sam package --s3-bucket <bucketname>
 \b
-To build only an individual resource (function or layer) located in the SAM
-template. Downstream SAM package and deploy will deploy only this resource
+To build an individual resource (function or layer) only from your SAM
+template. Downstream SAM package and deploy command will only deploy this resource.
 $ sam build MyFunction
 """
 
@@ -94,8 +94,8 @@ $ sam build MyFunction
     default=None,
     multiple=True,  # Can pass in multiple env vars
     required=False,
-    help="Input environment variables through command line to pass into build containers, you can either "
-    "input function specific format (FuncName.VarName=Value) or global format (VarName=Value). e.g., "
+    help="Input environment variables through command line to pass into build containers. You can either "
+    "input function-specific format (FuncName.VarName=Value) or global format (VarName=Value). e.g., "
     "sam build --use-container --container-env-var Func1.VAR1=value1 --container-env-var VAR2=value2",
     cls=ContainerOptions,
 )
@@ -133,8 +133,8 @@ $ sam build MyFunction
     "--parallel",
     "-p",
     is_flag=True,
-    help="Enabled parallel builds. Use this flag to build your AWS SAM template's functions and layers in parallel. "
-    "By default the functions and layers are built in sequence",
+    help="Enable parallel builds. Use this flag to build your AWS SAM template's functions and layers in parallel. "
+    "By default, functions and layers are built in sequence.",
 )
 @build_dir_option
 @cache_dir_option
